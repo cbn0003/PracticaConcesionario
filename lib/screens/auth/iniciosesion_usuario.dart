@@ -42,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
           behavior: SnackBarBehavior.floating,//Para que se mueva
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height - 240,//Se pone arriba
+            bottom: MediaQuery.of(context).size.height - 200,//Se pone arriba
             left:20,
             right: 20,
           ),
