@@ -138,7 +138,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
 
               // Categoría
               DropdownButtonFormField<String>(
-                value: _category,
+                initialValue: _category,
                 decoration: _inputDecoration('Categoría'),
                 items: _categories
                     .map((c) => DropdownMenuItem(value: c, child: Text(c)))
