@@ -19,15 +19,15 @@ class ProductModel {
   });
 
   //Convierte documento en ProductModel
-  factory ProductModel.fromFirestore(Map<String, dynamic> data, String id){
+  factory ProductModel.fromFirestore(Map<String, dynamic> data, String id) {
     return ProductModel(
-        id: id,
-        name: data['name'] ?? '',
-        description: data['description'] ?? '',
-        category: data['category'] ?? '',
-        price: data['price'] ?? '',
-        stock: data['stock'] ?? '',
-        lowStock: data['lowStock'] ?? 5,
+      id: id,
+      name: data['name'] ?? '',
+      description: data['description'] ?? '',
+      category: data['category'] ?? '',
+      price: (data['price'] ?? 0).toDouble(), 
+      stock: data['stock'] ?? 0,
+      lowStock: data['lowStock'] ?? 5,
     );
   }
 

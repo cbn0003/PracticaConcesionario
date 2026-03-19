@@ -10,6 +10,7 @@ class ProductProvider extends ChangeNotifier {
 
   String _searchQuery = '';
   String _selectedCategory = 'Todos';
+  String get selectedCategory => _selectedCategory;
 
   // Productos filtrados según búsqueda y categoría
   List<ProductModel> get filteredProducts {

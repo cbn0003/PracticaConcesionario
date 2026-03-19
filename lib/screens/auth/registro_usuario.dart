@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../core/theme.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -9,16 +10,13 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  // Controladores para capturar el texto de los inputs
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _passwordVisible = false;
-
-  //Variables para guardar mensajes de error
-  String? _errorPassword;
+  bool _isLoading = false;
   String? _errorMail;
+  String? _errorPassword;
 
-  // Es importante limpiar los controladores cuando el widget se destruye
   @override
   void dispose() {
     _emailController.dispose();
@@ -26,34 +24,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  // Lógica para crear el usuario en Firebase
   Future<void> registrarUsuario() async {
     setState(() {
       _errorMail = null;
       _errorPassword = null;
     });
-    String email = _emailController.text.trim();
-    String password = _passwordController.text.trim();
+
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
 
     final bool emailValid = RegExp(
-        r"^[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+"
+      r"^[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
     ).hasMatch(email);
 
-
-    // Validar que los campos no estén vacíos antes de llamar a Firebase
-    if (email.isEmpty || password.isEmpty || !emailValid) {
+    if (email.isEmpty || !emailValid || password.isEmpty) {
       setState(() {
         if (email.isEmpty) {
-          _errorMail = 'El correo electrónico no puede estar vacío.';
-        }else if(!emailValid){
-          _errorMail = 'El formato del correo no es válido.';
+          _errorMail = 'El correo no puede estar vacío';
+        } else if (!emailValid) {
+          _errorMail = 'El formato del correo no es válido';
         }
         if (password.isEmpty) {
-          _errorPassword = 'La contraseña no puede estar vacía.';
+          _errorPassword = 'La contraseña no puede estar vacía';
         }
       });
       return;
     }
+
+    setState(() => _isLoading = true);
 
     try {
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
@@ -61,121 +59,197 @@ class _RegisterScreenState extends State<RegisterScreen> {
         password: password,
       );
 
-      if (!mounted) return; // Verifica que el usuario no haya cerrado la pantalla
+      if (!mounted) return;
 
-      // Mensaje de éxito
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text("¡Cuenta creada! Ya puedes iniciar sesión.", textAlign: TextAlign.center),
-          backgroundColor: Colors.blue,
-          behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height - 130, // Lo posiciona arriba
-            left: 20,
-            right: 20,
+          content: const Text(
+            '¡Cuenta creada! Ya puedes iniciar sesión.',
+            textAlign: TextAlign.center,
           ),
+          backgroundColor: AppTheme.primary,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.all(16),
         ),
       );
 
-      // REGRESO AL LOGIN: Esta línea cierra esta pantalla y vuelve a la anterior
       await FirebaseAuth.instance.signOut();
-      Navigator.pop(context);
-
+      if (mounted) Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       setState(() {
         if (e.code == 'email-already-in-use') {
-          _errorMail = "Este correo ya está registrado";
+          _errorMail = 'Este correo ya está registrado';
         } else if (e.code == 'invalid-email') {
-          _errorMail = "El formato del correo no es válido";
+          _errorMail = 'El formato del correo no es válido';
         } else if (e.code == 'weak-password') {
-          _errorPassword = "La contraseña debe tener al menos 6 caracteres";
+          _errorPassword = 'La contraseña debe tener al menos 6 caracteres';
         } else if (e.code == 'network-request-failed') {
-          _errorMail = "No hay conexión a internet";
+          _errorMail = 'Sin conexión a internet';
         } else if (e.code == 'too-many-requests') {
-          _errorMail = "Demasiados intentos. Inténtalo más tarde";
+          _errorMail = 'Demasiados intentos. Inténtalo más tarde';
         } else {
-          _errorMail = "Error: ${e.code}";
+          _errorMail = 'Error: ${e.code}';
         }
       });
     } catch (e) {
-      // Errores genéricos (como falta de internet)
-      setState(() {
-        _errorMail = "Ocurrió un error inesperado";
-      });
+      setState(() => _errorMail = 'Ocurrió un error inesperado');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title:const Text("Crear cuenta"),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: SingleChildScrollView( // Evita errores de diseño si sale el teclado
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 40),
-              const Icon(Icons.person_add, size: 80, color: Colors.blue),
-              const SizedBox(height: 150),
+              const SizedBox(height: 48),
+
+              // Logo
+              Container(
+                width: double.infinity,
+                height: 180,
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withAlpha(20),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Icon(
+                  Icons.directions_car_rounded,
+                  size: 70,
+                  color: AppTheme.primary,
+                ),
+              ),
+
+              const SizedBox(height: 32),
+
+              const Text(
+                'Crear cuenta',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textDark,
+                ),
+              ),
+              const Text(
+                'Regístrate para empezar',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppTheme.textMuted,
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Email
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
-                  labelText: "Correo electrónico",
-                  hintText: "ejemplo@correo.com",
+                  hintText: 'Correo electrónico',
                   errorText: _errorMail,
+                  filled: true,
+                  fillColor: Colors.white,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10)
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                   ),
-                  prefixIcon: Icon(
-                    Icons.email,
-                    color: Colors.blue,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                        color: Color(0xFF2563EB), width: 1.5),
                   ),
                 ),
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: 12),
 
+              // Contraseña
               TextField(
                 controller: _passwordController,
                 obscureText: !_passwordVisible,
                 decoration: InputDecoration(
-                  labelText: "Contraseña",
+                  hintText: 'Contraseña',
                   errorText: _errorPassword,
+                  filled: true,
+                  fillColor: Colors.white,
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10)
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                   ),
-                    prefixIcon: Icon(
-                      Icons.lock,
-                      color: Colors.blue,
-                    ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                        color: Color(0xFF2563EB), width: 1.5),
+                  ),
                   suffixIcon: IconButton(
                     icon: Icon(
-                    _passwordVisible ? Icons.visibility : Icons.visibility_off,
-                      color: Colors.blue,
+                      _passwordVisible
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                      color: AppTheme.textMuted,
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _passwordVisible = !_passwordVisible;
-                      });
-                    },
-                  )
+                    onPressed: () => setState(
+                          () => _passwordVisible = !_passwordVisible,
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(height: 25),
 
+              const SizedBox(height: 24),
+
+              // Botón registrar
               SizedBox(
                 width: double.infinity,
-                height: 50,
                 child: ElevatedButton(
-                  onPressed: registrarUsuario,
-                  child: const Text("Registrarme", style: TextStyle(fontSize: 18), selectionColor: Colors.blue),
+                  onPressed: _isLoading ? null : registrarUsuario,
+                  child: _isLoading
+                      ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                      : const Text('Registrarme'),
+                ),
+              ),
 
+              const SizedBox(height: 20),
 
+              Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      '¿Ya tienes cuenta? ',
+                      style: TextStyle(color: AppTheme.textMuted),
+                    ),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: const Text(
+                        'Iniciar sesión',
+                        style: TextStyle(
+                          color: AppTheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

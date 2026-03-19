@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/product_provider.dart';
 import '../../models/product_model.dart';
+import '../../core/theme.dart';
 import '../auth/profile_screen.dart';
 import 'product_form_screen.dart';
 
@@ -16,7 +17,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
   @override
   void initState() {
     super.initState();
-    // Arranca la escucha de Firestore al entrar a la pantalla
     context.read<ProductProvider>().listenToProducts();
   }
 
@@ -25,8 +25,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
     final provider = context.watch<ProductProvider>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Inventario'),
-      centerTitle: true,
+      appBar: AppBar(
+        title: const Text('Inventario', textAlign: TextAlign.center,),
         actions: [
           IconButton(
             icon: const Icon(Icons.person_outline),
@@ -37,8 +37,9 @@ class _ProductListScreenState extends State<ProductListScreen> {
           ),
         ],
       ),
-
       floatingActionButton: FloatingActionButton(
+        backgroundColor: AppTheme.primary,
+        foregroundColor: Colors.white,
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const ProductFormScreen()),
@@ -47,44 +48,94 @@ class _ProductListScreenState extends State<ProductListScreen> {
       ),
       body: Column(
         children: [
-          // Barra de búsqueda
+          // Buscador
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
             child: TextField(
-              decoration: const InputDecoration(
-                hintText: 'Buscar producto...',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
-              ),
               onChanged: provider.setSearchQuery,
+              decoration: InputDecoration(
+                hintText: 'Buscar producto...',
+                prefixIcon: const Icon(Icons.search, color: AppTheme.textMuted),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide:
+                  const BorderSide(color: AppTheme.primary, width: 1.5),
+                ),
+              ),
             ),
           ),
-          // Filtro por categoría
+
+          // Chips de categoría
           SizedBox(
             height: 40,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: provider.categories.length,
               itemBuilder: (_, i) {
                 final cat = provider.categories[i];
+                final isSelected = provider.selectedCategory == cat;
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
-                  child: FilterChip(
-                    label: Text(cat),
-                    selected: provider.filteredProducts.isNotEmpty,
-                    onSelected: (_) => provider.setCategory(cat),
+                  child: GestureDetector(
+                    onTap: () => provider.setCategory(cat),
+                    child: Container(
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: isSelected ? AppTheme.primary : Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: isSelected
+                              ? AppTheme.primary
+                              : const Color(0xFFE2E8F0),
+                        ),
+                      ),
+                      child: Text(
+                        cat,
+                        style: TextStyle(
+                          color: isSelected ? Colors.white : AppTheme.textDark,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
                   ),
                 );
               },
             ),
           ),
-          const SizedBox(height: 8),
-          // Lista de productos
+
+          const SizedBox(height: 12),
+
+          // Grid de productos
           Expanded(
             child: provider.filteredProducts.isEmpty
-                ? const Center(child: Text('No hay productos'))
-                : ListView.builder(
+                ? const Center(
+              child: Text(
+                'No hay productos',
+                style: TextStyle(color: AppTheme.textMuted),
+              ),
+            )
+                : GridView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              gridDelegate:
+              const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 0.78,
+              ),
               itemCount: provider.filteredProducts.length,
               itemBuilder: (_, i) {
                 final product = provider.filteredProducts[i];
@@ -106,33 +157,100 @@ class _ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isLowStock = product.stock <= product.lowStock;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      child: ListTile(
-        title: Text(product.name),
-        subtitle: Text(product.category),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ProductFormScreen(product: product),
+        ),
+      ),
+      onLongPress: () => _confirmDelete(context, product),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('${product.price.toStringAsFixed(2)} €',
-                style: const TextStyle(fontWeight: FontWeight.bold)),
-            Text(
-              'Stock: ${product.stock}',
-              style: TextStyle(
-                color: isLowStock ? Colors.red : Colors.green,
-                fontSize: 12,
+            // Imagen placeholder
+            Container(
+              height: 100,
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withAlpha(15),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(16),
+                ),
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.directions_car_rounded,
+                  size: 48,
+                  color: AppTheme.primary,
+                ),
+              ),
+            ),
+
+            // Info
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.name,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textDark,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    product.category,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppTheme.textMuted,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '${product.price.toStringAsFixed(2)} €',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  // Badge de stock
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: isLowStock
+                          ? Colors.red.withAlpha(20)
+                          : Colors.green.withAlpha(20),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      'Stock: ${product.stock}',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: isLowStock ? Colors.red : Colors.green,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ProductFormScreen(product: product),
-          ),
-        ),
-        onLongPress: () => _confirmDelete(context, product),
       ),
     );
   }
@@ -142,7 +260,8 @@ class _ProductCard extends StatelessWidget {
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('Eliminar producto'),
-        content: Text('¿Seguro que quieres eliminar "${product.name}"?'),
+        content:
+        Text('¿Seguro que quieres eliminar "${product.name}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -153,8 +272,10 @@ class _ProductCard extends StatelessWidget {
               context.read<ProductProvider>().deleteProduct(product.id);
               Navigator.pop(context);
             },
-            child:
-            const Text('Eliminar', style: TextStyle(color: Colors.red)),
+            child: const Text(
+              'Eliminar',
+              style: TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),
