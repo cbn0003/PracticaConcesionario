@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'screens/products/product_list_screen.dart';
 import 'screens/auth/iniciosesion_usuario.dart';
 
+
 class InventarioApp extends StatelessWidget {
   const InventarioApp({super.key});
 
@@ -12,6 +13,7 @@ class InventarioApp extends StatelessWidget {
       title: 'Concesionario',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        fontFamily: 'Inter',
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),

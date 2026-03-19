@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/product_model.dart';
 import '../../providers/product_provider.dart';
+import '../../core/theme.dart';
 
 class ProductFormScreen extends StatefulWidget {
-  final ProductModel? product; // null = añadir, no null = editar
+  final ProductModel? product;
 
   const ProductFormScreen({super.key, this.product});
 
@@ -23,6 +24,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
 
   final List<String> _categories = ['Coche', 'Moto', 'Furgoneta', 'Repuesto'];
   bool _isEditing = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -49,6 +51,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
+    setState(() => _isLoading = true);
+
     final provider = context.read<ProductProvider>();
     final product = ProductModel(
       id: widget.product?.id ?? '',
@@ -65,7 +69,41 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       await provider.addProduct(product);
     }
 
-    if (mounted) Navigator.pop(context);
+    if (mounted) {
+      setState(() => _isLoading = false);
+      Navigator.pop(context);
+    }
+  }
+
+  // Estilo compartido para todos los campos
+  InputDecoration _inputDecoration(String label, {String? suffix}) {
+    return InputDecoration(
+      labelText: label,
+      suffixText: suffix,
+      labelStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 14),
+      filled: true,
+      fillColor: Colors.white,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppTheme.primary, width: 1.5),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.red),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.red, width: 1.5),
+      ),
+    );
   }
 
   @override
@@ -73,40 +111,46 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_isEditing ? 'Editar producto' : 'Nuevo producto'),
-        centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(24),
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Nombre
               TextFormField(
                 controller: _nameCtrl,
-                decoration: const InputDecoration(labelText: 'Nombre'),
+                decoration: _inputDecoration('Nombre'),
                 validator: (v) =>
                 v == null || v.isEmpty ? 'Campo obligatorio' : null,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
+
+              // Descripción
               TextFormField(
                 controller: _descCtrl,
-                decoration: const InputDecoration(labelText: 'Descripción'),
+                decoration: _inputDecoration('Descripción'),
                 maxLines: 3,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
+
+              // Categoría
               DropdownButtonFormField<String>(
                 initialValue: _category,
-                decoration: const InputDecoration(labelText: 'Categoría'),
+                decoration: _inputDecoration('Categoría'),
                 items: _categories
                     .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                     .toList(),
                 onChanged: (v) => setState(() => _category = v!),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
+
+              // Precio
               TextFormField(
                 controller: _priceCtrl,
-                decoration: const InputDecoration(
-                    labelText: 'Precio (€)', suffixText: '€'),
+                decoration: _inputDecoration('Precio', suffix: '€'),
                 keyboardType: TextInputType.number,
                 validator: (v) {
                   if (v == null || v.isEmpty) return 'Campo obligatorio';
@@ -114,11 +158,12 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
+
+              // Stock
               TextFormField(
                 controller: _stockCtrl,
-                decoration:
-                const InputDecoration(labelText: 'Cantidad en stock'),
+                decoration: _inputDecoration('Cantidad en stock'),
                 keyboardType: TextInputType.number,
                 validator: (v) {
                   if (v == null || v.isEmpty) return 'Campo obligatorio';
@@ -126,12 +171,24 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
+
+              // Botón guardar
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _save,
-                  child: Text(_isEditing ? 'Guardar cambios' : 'Añadir producto',),
+                  onPressed: _isLoading ? null : _save,
+                  child: _isLoading
+                      ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                      : Text(
+                      _isEditing ? 'Guardar cambios' : 'Añadir producto'),
                 ),
               ),
             ],
