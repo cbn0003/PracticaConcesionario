@@ -16,4 +16,9 @@ For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
+<<<<<<< HEAD
 CAMBIOS EN EL README PARA COMPROBAR
+=======
+CAMBIOS EN EL README PARA COMPROBAR
+CAMBIOS EN EL README PARA COMPROBAR
+>>>>>>> bf6b44fd51aa9b68aa46deb8c28107cb823516b8
