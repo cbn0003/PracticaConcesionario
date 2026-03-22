@@ -39,4 +39,4 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: true # Lo dejamos activado por si acaso para el futuro
-  image_path: "lib/assets/icon/car.png" # Reemplaza con tu nombre de archivo
+  image_path: "assets/icon/car.png" # Reemplaza con tu nombre de archivo
