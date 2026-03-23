@@ -22,7 +22,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   late TextEditingController _stockCtrl;
   String _category = 'Coche';
 
-  final List<String> _categories = ['Coche', 'Moto', 'Furgoneta', 'Repuesto'];
+  final List<String> _categories = ['Coche', 'Moto', 'Furgoneta'];
   bool _isEditing = false;
   bool _isLoading = false;
 
