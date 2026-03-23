@@ -56,7 +56,7 @@ class ProductProvider extends ChangeNotifier {
     await _service.updateProduct(product);
   }
 
-  Future<void> deleteProduct(String id) async {
-    await _service.deleteProduct(id);
+  Future<void> deleteProduct(String id, String category) async {
+    await _service.deleteProduct(id, category);
   }
 }

@@ -260,8 +260,7 @@ class _ProductCard extends StatelessWidget {
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('Eliminar producto'),
-        content:
-        Text('¿Seguro que quieres eliminar "${product.name}"?'),
+        content: Text('¿Seguro que quieres eliminar "${product.name}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -269,7 +268,8 @@ class _ProductCard extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              context.read<ProductProvider>().deleteProduct(product.id);
+              // ✅ Aquí es donde va, con product.category
+              context.read<ProductProvider>().deleteProduct(product.id, product.category);
               Navigator.pop(context);
             },
             child: const Text(

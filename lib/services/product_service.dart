@@ -46,8 +46,22 @@ class ProductService {
   }
 
   // Eliminar producto
-  Future<void> deleteProduct(String id) async {
-    await _collection.doc(id).delete();
+  Future<void> deleteProduct(String id, String category) async {
+    final categoryRef = _firestore
+        .collection('category')
+        .doc(_categoryDocId(category));
+
+    final batch = _firestore.batch();
+
+    // Elimina el documento de products
+    batch.delete(_collection.doc(id));
+
+    // Elimina el ID del array en category
+    batch.update(categoryRef, {
+      'list': FieldValue.arrayRemove([id]),
+    });
+
+    await batch.commit();
   }
 
   // Traduce la categoría del formulario al doc de Firebase
