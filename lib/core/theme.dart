@@ -29,7 +29,7 @@ class AppTheme {
 
       // AppBar
       appBarTheme: const AppBarTheme(
-        backgroundColor: surface,
+        backgroundColor: background,
         foregroundColor: textDark,
         elevation: 0,
         centerTitle: true,
@@ -90,7 +90,7 @@ class AppTheme {
         color: surface,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
           side: const BorderSide(color: border),
         ),
       ),

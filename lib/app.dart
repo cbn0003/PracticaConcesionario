@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'screens/products/product_list_screen.dart';
 import 'screens/auth/iniciosesion_usuario.dart';
+import 'core/theme.dart';
 
 
 class InventarioApp extends StatelessWidget {
@@ -12,11 +13,7 @@ class InventarioApp extends StatelessWidget {
     return MaterialApp(
       title: 'Concesionario',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        fontFamily: 'Inter',
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.lightTheme,
       routes: {
         '/': (context) => StreamBuilder<User?>(
           stream: FirebaseAuth.instance.authStateChanges(),
