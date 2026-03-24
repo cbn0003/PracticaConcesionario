@@ -66,13 +66,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
           content: const Text(
             '¡Cuenta creada! Ya puedes iniciar sesión.',
             textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
           backgroundColor: AppTheme.primary,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          margin: const EdgeInsets.all(16),
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height - 130,
+            left: 16,
+            right: 16,
+          ),
         ),
       );
 
