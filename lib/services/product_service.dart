@@ -73,6 +73,8 @@ class ProductService {
         return 'bikes';
       case 'furgoneta':
         return 'vans';
+      case 'grua':
+        return 'gruas';
       default:
         return category.toLowerCase();
     }
