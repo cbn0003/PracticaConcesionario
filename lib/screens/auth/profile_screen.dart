@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import '../../services/auth_services.dart';
 
@@ -29,7 +31,10 @@ class ProfileScreen extends StatelessWidget {
             Card(
               child: ListTile(
                 leading: const Icon(Icons.email_outlined),
-                title: const Text('Correo electrónico'),
+                title: const Text(
+                    'Correo electrónico:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 subtitle: Text(user?.email ?? 'Sin correo'),
               ),
             ),
@@ -39,7 +44,10 @@ class ProfileScreen extends StatelessWidget {
             Card(
               child: ListTile(
                 leading: const Icon(Icons.fingerprint),
-                title: const Text('ID de usuario'),
+                title: const Text(
+                    'ID de usuario:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 subtitle: Text(user?.uid ?? '-'),
               ),
             ),

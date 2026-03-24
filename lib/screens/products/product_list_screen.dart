@@ -268,7 +268,7 @@ class _ProductCard extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              // ✅ Aquí es donde va, con product.category
+              //  Aquí es donde va, con product.category
               context.read<ProductProvider>().deleteProduct(product.id, product.category);
               Navigator.pop(context);
             },
