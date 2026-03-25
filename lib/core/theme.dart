@@ -32,10 +32,9 @@ class AppTheme {
         backgroundColor: background,
         foregroundColor: textDark,
         elevation: 0,
-        centerTitle: true,
         titleTextStyle: TextStyle(
           color: textDark,
-          fontSize: 18,
+          fontSize: 20,
           fontWeight: FontWeight.w600,
         ),
       ),
