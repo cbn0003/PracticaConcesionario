@@ -106,20 +106,25 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 48),
 
               // Logo
-              Container(
+              SizedBox(
                 width: double.infinity,
                 height: 180,
-                decoration: BoxDecoration(
-                  color: AppTheme.primary.withAlpha(20),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Icon(
-                  Icons.directions_car_rounded,
-                  size: 80,
-                  color: AppTheme.primary,
+                child: Center(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      width: 150,
+                      height: 150,
+                      color: AppTheme.primary.withAlpha(20),
+                      child: Image.asset(
+                        'assets/icon/car.png',
+                        width: 150,
+                        height: 150,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-
               const SizedBox(height: 32),
 
               const Text(

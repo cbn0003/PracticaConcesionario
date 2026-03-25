@@ -26,7 +26,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Inventario', textAlign: TextAlign.center,),
+        title: const Text('Inventario'),
+        centerTitle: true               ,
         actions: [
           IconButton(
             icon: const Icon(Icons.person_outline),
