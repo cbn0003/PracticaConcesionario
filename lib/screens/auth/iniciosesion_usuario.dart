@@ -59,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
           content: const Text(
             '¡Bienvenido/a!',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white, fontSize: 16),
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
           backgroundColor: AppTheme.primary,
           behavior: SnackBarBehavior.floating,
